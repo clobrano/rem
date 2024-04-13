@@ -31,8 +31,27 @@ $ rem Call mom | in 45 minutes
 
 instead than
 ```bash
-rem Call mom | at now + 45 minutes
+$ rem Call mom | at now + 45 minutes
 ```
+
+Calling `rem` without arguments will show the existing reminders with execution time, time left and JOB ID.
+
+```bash
+$ rem
+- Apr/13/2024 17:39/0h:28m (6) call mom
+- Apr/13/2024 18:00/0h:49m (4) buy the milk
+- Apr/14/2024 20:00/01d (5) take out the trash
+```
+
+The JOB ID is important to cancel a reminder.
+
+```bash
+$ atrm 4
+$ rem
+- Apr/13/2024 17:39/0h:27m (6) call mom
+- Apr/14/2024 20:00/01d (5) take out the trash
+```
+
 
 ## Installation
 
@@ -47,4 +66,5 @@ rem Call mom | at now + 45 minutes
 **Second bonus**
 
 Move the script in a location under your `$PATH` (e.g. `$HOME/.local/bin` ) so that it can be executed everywhere in your system.
+
 
