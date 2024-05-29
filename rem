@@ -88,6 +88,7 @@ if [ "$#" -eq 2 ] && [ "$1" == "del" ]; then
     echo "Continue? [ENTER/Ctrl-C]"
     read
     atrm $2
+    echo "done"
     exit 0
 fi
 
@@ -121,7 +122,7 @@ if [ "$#" -ge 3 ]; then
 
     if [ "$time_type" == "at" ]; then
         echo "notify-send \"$message\" && paplay /usr/share/sounds/freedesktop/stereo/complete.oga" | \
-            at $queue $time_value
+            at -q "$queue" $time_value
     fi
     if [ "$time_type" == "in" ]; then
         echo "notify-send \"$message\" && paplay /usr/share/sounds/freedesktop/stereo/complete.oga" | \
