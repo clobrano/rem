@@ -1,15 +1,39 @@
 #!/usr/bin/env bash
 # -*- coding: UTF-8 -*-
+#echo "notify-send \"$@\""
+
 # if not input is given, just show all the jobs in the queue with:
 # - the time at which the job will fire
 # - the job number
 # - the command that will be run
 
-if [ -z "$1" ]; then
+# Function to display usage information
+usage() {
+    echo "Usage: rem <message> at:<time>  # add new reminder AT given time (e.g. 16:00)"
+    echo "       rem <message> in:<time>  # add new reminder IN given time (e.g. 5 min, 1 hour)"
+    echo "       rem                      # list all reminders and their ID"
+    echo "       rem del <id>             # delete reminder with <id>"
+    echo "       help                     # to show this message"
+    exit 1
+}
+
+# Using a custom queue
+queue="z"
+
+
+# help
+
+if [ "$#" -eq 1 ] && [ $1 == "help" ]; then
+    usage
+    exit 0
+fi
+
+# Listing all reminders
+if [ "$#" -eq 0 ]; then
     source $HOME/.config/cconf/zsh/functions.zsh
 
     function atq_sort() {
-    atq | \
+    atq -q ${queue} | \
         awk '{system("echo "$1 "  $(date +\"%Y-%m-%d %H:%M\"  --date \""$2" "$3" "$4" "$5" "$6"\")  "$7"  "$8 )}' | \
         sort -k2
     }
@@ -26,7 +50,7 @@ if [ -z "$1" ]; then
 
     tmp=$(mktemp)
     for i in "${!jobids[@]}"; do
-        message=$(at -c "${jobids[$i]}" | grep notify | sed -e 's/.*['\''"]\(.*\).*['\''"]/\1/')
+        message=$(at -q ${queue} -c "${jobids[$i]}" | grep notify | sed -e 's/.*"\(.*\)".*/\1/' | sed -e 's/.*['\''"]\(.*\).*['\''"]/\1/')
         if [[ ${today} == ${dates[$i]} ]]; then
             time_left=$(time_left_in_seconds ${timings[$i]})
             time_left=$(humanizetime ${time_left})
@@ -39,8 +63,71 @@ if [ -z "$1" ]; then
         echo "- ${fancy_dates[$i]} ${timings[$i]}/${time_left} (${jobids[$i]}) ${message}" >> ${tmp}
     done
 
-    cat ${tmp}
+    if [ $(cat ${tmp} | wc -l) -eq 0 ]; then
+        echo "No messages"
+    else
+        cat ${tmp}
+    fi
     exit 0
 fi
 
-echo "notify-send \"$@\""
+
+# Removing a reminder from the list
+if [ "$#" -eq 2 ] && [ "$1" == "del" ]; then
+    if [ -z $2 ]; then
+        echo "[!] missing job id to remove"
+        exit 1
+    fi
+    selection=$(at -q ${queue} -c "$2" | grep notify | sed -e 's/.*"\(.*\)".*/\1/' | sed -e 's/.*['\''"]\(.*\).*['\''"]/\1/')
+
+    if [ -z "${selection}" ]; then
+        echo "[!] could not find job id $2 in the queue"
+        exit 1
+    fi
+    echo "removing reminder $2:\"${selection}\" from the queue"
+    echo "Continue? [ENTER/Ctrl-C]"
+    read
+    atrm $2
+    exit 0
+fi
+
+# Setting a new reminder
+if [ "$#" -ge 3 ]; then
+    # Combine all arguments into a single string
+    input="$*"
+
+    # Extract the time specification (at: or in:) and the time value
+    if [[ "$input" =~ at:(.*) ]]; then
+        time_type="at"
+        time_value="${BASH_REMATCH[1]}"
+        # Extract the message by removing the time part
+        message="${input%% at:*}"
+    elif [[ "$input" =~ in:(.*) ]]; then
+        time_type="in"
+        time_value="${BASH_REMATCH[1]}"
+        # Extract the message by removing the time part
+        message="${input%% in:*}"
+    else
+        usage
+    fi
+
+    # Trim leading and trailing whitespace from the message
+    message=$(echo "$message" | xargs)
+
+    # Display the extracted values (for debugging purposes)
+    #echo "Message: $message"
+    #echo "Time type: $time_type"
+    #echo "Time value: $time_value"
+
+    if [ "$time_type" == "at" ]; then
+        echo "notify-send \"$message\" && paplay /usr/share/sounds/freedesktop/stereo/complete.oga" | \
+            at $queue $time_value
+    fi
+    if [ "$time_type" == "in" ]; then
+        echo "notify-send \"$message\" && paplay /usr/share/sounds/freedesktop/stereo/complete.oga" | \
+            at -q $queue now + $time_value
+    fi
+    exit 0
+fi
+
+usage
