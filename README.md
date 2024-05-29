@@ -1,40 +1,31 @@
 # rem
 
-"rem" is a Bash application for creating reminders on Linux systems. It utilizes the `at` command to schedule system notifications with custom messages at specified times and `notify-send` to deliver such reminders. With its minimalist design and straightforward syntax, "rem" aims to provide users with a seamless experience for managing reminders effortlessly.
+`rem` is a Bash script designed to create reminders on Linux systems. It leverages the `at` command to schedule notifications with custom messages at specified times, uses `notify-send` to display these reminders, and `paplay` to emit a notification sound. With its minimalist design and straightforward syntax, `rem` offers users an easy and efficient way to manage their reminders.
 
 ## Features
 
 - Schedule reminders with custom messages using a simple syntax.
-- Utilizes the `at` command for scheduling, ensuring compatibility with most Linux distributions.
 - Lightweight and easy to use, perfect for users seeking a streamlined reminder solution.
 
 ## Usage
 
 ```bash
-$ rem your reminder message | at [time]
+rem help   
+Usage: rem <message> at:<time>  # add new reminder AT given time (e.g. 16:00)
+       rem <message> in:<time>  # add new reminder IN given time (e.g. 5 min, 1 hour)
+       rem                      # list all reminders and their ID
+       rem del <id>             # delete reminder with <id>
+       help                     # to show this message
 ```
 
 ### Examples
 
 ```bash
-$ rem Buy the milk | at 6pm
-$ rem Take out the trash | at 8pm Tomorrow
+$ rem Buy the milk at:6pm Tomorrow
+$ rem Take out the trash in:30 min
 ```
 
-**First Bonus**
-
-Set an alias in your `.bashr`|`.zshrc`|`.fishrc` like `alias in="at now +"`, so that you can also write
-
-```bash
-$ rem Call mom | in 45 minutes
-```
-
-instead than
-```bash
-$ rem Call mom | at now + 45 minutes
-```
-
-Calling `rem` without arguments will show the existing reminders with execution time, time left and JOB ID.
+Calling `rem` without arguments will show the existing reminders with execution time, time left and the reminder ID.
 
 ```bash
 $ rem
@@ -43,10 +34,14 @@ $ rem
 - Apr/14/2024 20:00/01d (5) take out the trash
 ```
 
-The JOB ID is important to cancel a reminder.
+The ID is important to cancel a reminder.
 
 ```bash
-$ atrm 4
+$ rem del 4                           
+removing reminder 4:"buy the milk" from the queue
+Continue? [ENTER/Ctrl-C]
+
+done
 $ rem
 - Apr/13/2024 17:39/0h:27m (6) call mom
 - Apr/14/2024 20:00/01d (5) take out the trash
@@ -62,8 +57,6 @@ $ rem
     ```bash
     $ chmod +x rem
     ```
-
-**Second bonus**
 
 Move the script in a location under your `$PATH` (e.g. `$HOME/.local/bin` ) so that it can be executed everywhere in your system.
 
