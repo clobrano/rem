@@ -1,6 +1,9 @@
 # rem
 
-`rem` is a Bash script designed to create reminders on Linux systems. It leverages the `at` command to schedule notifications with custom messages at specified times, uses `notify-send` to display these reminders, and `paplay` to emit a notification sound. With its minimalist design and straightforward syntax, `rem` offers users an easy and efficient way to manage their reminders.
+`rem` is a Bash script designed to create reminders on Linux systems. It leverages the `at` command
+to schedule notifications with custom messages at specified times, uses `notify-send` to display
+these reminders, and `paplay` to emit a notification sound. With its minimalist design and
+straightforward syntax, `rem` offers users an easy and efficient way to manage their reminders.
 
 ## Features
 
@@ -25,7 +28,8 @@ $ rem Buy the milk at:6pm Tomorrow
 $ rem Take out the trash in:30 min
 ```
 
-Calling `rem` without arguments will show the existing reminders with execution time, time left and the reminder ID.
+Calling `rem` without arguments will show the existing reminders with execution time, time left and
+the reminder ID.
 
 ```bash
 $ rem
