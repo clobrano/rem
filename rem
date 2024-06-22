@@ -17,12 +17,13 @@ usage() {
     exit 1
 }
 
+DEBUG=0
+HISTORY=/home/clobrano/.rem.`date +%F`
+
 # Using a custom queue
 queue="z"
 
-
 # help
-
 if [ "$#" -eq 1 ] && [ $1 == "help" ]; then
     usage
     exit 0
@@ -93,7 +94,7 @@ if [ "$#" -eq 2 ] && [ "$1" == "del" ]; then
 fi
 
 # Setting a new reminder
-if [ "$#" -ge 3 ]; then
+if [ "$#" -ge 2 ]; then
     # Combine all arguments into a single string
     input="$*"
 
@@ -116,17 +117,22 @@ if [ "$#" -ge 3 ]; then
     message=$(echo "$message" | xargs)
 
     # Display the extracted values (for debugging purposes)
-    #echo "Message: $message"
-    #echo "Time type: $time_type"
-    #echo "Time value: $time_value"
+    if [[ ${DEBUG} = 1 ]]; then
+        echo "Inputs: $#"
+        echo "Message: $message"
+        echo "Time type: $time_type"
+        echo "Time value: $time_value"
+    fi
+
+    at_script="notify-send \"$message\" && \
+        paplay /usr/share/sounds/freedesktop/stereo/complete.oga && \
+        echo "$message" >> "$HISTORY""
 
     if [ "$time_type" == "at" ]; then
-        echo "notify-send \"$message\" && paplay /usr/share/sounds/freedesktop/stereo/complete.oga" | \
-            at -q "$queue" $time_value
+        echo "$at_script" | at -q "$queue" $time_value
     fi
     if [ "$time_type" == "in" ]; then
-        echo "notify-send \"$message\" && paplay /usr/share/sounds/freedesktop/stereo/complete.oga" | \
-            at -q $queue now + $time_value
+        echo "$at_script" | at -q $queue now + $time_value
     fi
     exit 0
 fi
