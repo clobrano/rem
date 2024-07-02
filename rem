@@ -29,9 +29,14 @@ if [ "$#" -eq 1 ] && [ $1 == "help" ]; then
     exit 0
 fi
 
-# Listing all reminders
+# Listing all reminders (fired and future)
 if [ "$#" -eq 0 ]; then
     source $HOME/.config/cconf/zsh/functions.zsh
+
+    # cat already fired reminders from history
+    if [[ -f "$HISTORY" ]] && [[ $(wc -l "$HISTORY" | cut -d" " -f1) -gt 0 ]]; then
+        cat $HISTORY
+    fi
 
     function atq_sort() {
     atq -q ${queue} | \
@@ -61,7 +66,7 @@ if [ "$#" -eq 0 ]; then
             diff=$(echo "`date +%s -d ${dates[$i]}` - `date +%s -d ${tomorrow}`"|bc)
             time_left=$(date +%d -d @${diff})d
         fi
-        echo "- ${fancy_dates[$i]} ${timings[$i]}/${time_left} (${jobids[$i]}) ${message}" >> ${tmp}
+        echo "${fancy_dates[$i]} ${timings[$i]}/${time_left} (${jobids[$i]}) ${message}" >> ${tmp}
     done
 
     if [ $(cat ${tmp} | wc -l) -eq 0 ]; then
@@ -126,7 +131,7 @@ if [ "$#" -ge 2 ]; then
 
     at_script="notify-send \"$message\" && \
         paplay /usr/share/sounds/freedesktop/stereo/complete.oga && \
-        echo "$message" >> "$HISTORY""
+        echo \$(date +\"%b/%d/%Y %H:%M\") "$message" >> "$HISTORY""
 
     if [ "$time_type" == "at" ]; then
         echo "$at_script" | at -q "$queue" $time_value
