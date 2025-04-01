@@ -56,7 +56,7 @@ if [ "$#" -eq 0 ]; then
 
     tmp=$(mktemp)
     for i in "${!jobids[@]}"; do
-        message=$(at -q ${queue} -c "${jobids[$i]}" | grep notify | sed -e 's/.*"\(.*\)".*/\1/' | sed -e 's/.*['\''"]\(.*\).*['\''"]/\1/')
+        message=$(at -q ${queue} -c "${jobids[$i]}" | grep notify | cut -d'&' -f1 | sed -e 's/.*"\(.*\)".*/\1/' | sed -e 's/.*['\''"]\(.*\).*['\''"]/\1/')
         if [[ ${today} == ${dates[$i]} ]]; then
             time_left=$(time_left_in_seconds ${timings[$i]})
             time_left=$(humanizetime ${time_left})
